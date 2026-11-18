@@ -1,7 +1,63 @@
+<p align="center"><img src="docs/icon.png" width="96" alt="Finger Pass icon"></p>
+
 # Finger Pass
 
-GNOME Shell extension. Administrator prompts take your fingerprint or your
-password, whichever comes first, in one dialog.
+**Answer administrator prompts with your fingerprint or your password, whichever comes first.**
+
+GNOME's authentication dialog makes you pick: the fingerprint comes first, the
+password only after a delay. Finger Pass replaces it with one dialog that
+shows the reader and the password field together. Touch the reader or start
+typing, there is nothing to wait for.
+
+![The dialog waiting, refusing a finger, accepting one](docs/screenshot.png)
+
+- The reader's state is drawn in the dialog: waiting, not recognised, recognised, and the attempts left.
+- A preferences window turns the fingerprint on for **administrator dialogs** and for **`sudo`** with one click, checks your reader, and undoes it just as easily.
+- If a package update takes the setup away, the dialog says so and one click (**Repair**) brings it back.
+- It never touches login or the lock screen: after a restart you still type your password once.
+
+## Install
+
+From [extensions.gnome.org](https://extensions.gnome.org) (search for *Finger Pass*), or from a release:
+
+```bash
+gnome-extensions install --force finger-pass@griffit.gmail.com.shell-extension.zip
+```
+
+Log out and back in (Wayland does not see a new extension before that), enable
+it, then open its preferences and click **Turn On**. You are asked for your
+password once. Details with screenshots: [docs/guide.md](docs/guide.md).
+
+You need a fingerprint reader supported by [libfprint](https://fprint.freedesktop.org/supported-devices.html)
+and at least one finger enrolled (Settings, System, Users). It targets GNOME
+Shell 51.
+
+## Good to know
+
+- **It is a trade-off.** A touch is less deliberate than typing a password: a program in the background can raise an administrator prompt and wait for you to touch the reader for something else. The dialog names who is asking for what; read it before you touch.
+- **Turn On edits system files**, with your password, through `pkexec`: one line in `/etc/pam.d/sudo` (and `sudo-i`) and a copy of the polkit file in `/etc/pam.d/polkit-1`. Originals are kept in `/var/backups/finger-pass`, every line ends with `# finger-pass`, and **Turn Off** removes them.
+- **Removing the extension does not remove the setup.** Turn Off first, or see "Removing it by hand" below.
+- In a terminal, `sudo` prints a hint, waits 5 seconds for the finger, and **Ctrl+C** goes straight to the password.
+- Over SSH the fingerprint is never asked for.
+
+## Removing it by hand
+
+Delete the lines ending in `# finger-pass` from `/etc/pam.d/sudo`,
+`/etc/pam.d/sudo-i` and `/etc/pam.d/polkit-1` (and the whole file when its
+first line says it was copied by finger-pass), then the folder
+`/etc/finger-pass`.
+
+## Tested on
+
+Ubuntu 26.10 (GNOME Shell 51.0, `sudo-rs`) and Fedora 45 (GNOME Shell 51.1, classic `sudo`, SELinux enforcing, `authselect`) in virtual machines with a virtual reader; and on a real Synaptics 06cb:00bd reader (Ubuntu 26.10). Other readers, other distributions and other shell versions are not tested: reports are welcome.
+
+## License
+
+GPL-2.0-or-later.
+
+---
+
+## How it works
 
 - `extension/dialog.js` — the dialog. With pam_fprintd in the polkit-1 stack
   it runs two authentication sessions for the same request: the first holds
