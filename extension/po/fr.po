@@ -1,0 +1,127 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: finger-pass\n"
+"Language: fr\n"
+"PO-Revision-Date: 2026-11-17 15:00+0100\n"
+"Last-Translator: d101c\n"
+"Language-Team: French\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "or"
+msgstr "ou"
+
+msgid "Touch the fingerprint reader"
+msgstr "Posez le doigt sur le lecteur d’empreintes"
+
+msgid "Fingerprint not recognised"
+msgstr "Empreinte non reconnue"
+
+msgid "Fingerprint recognised"
+msgstr "Empreinte reconnue"
+
+msgid "Too many attempts. Type your password."
+msgstr "Trop d’essais. Saisissez votre mot de passe."
+
+msgid "Fingerprint reader paused. Type your password."
+msgstr "Lecteur d’empreintes en pause. Saisissez votre mot de passe."
+
+msgid "Fingerprint reader"
+msgstr "Lecteur d’empreintes"
+
+msgid "Looking for a reader…"
+msgstr "Recherche d’un lecteur…"
+
+msgid "Fingerprint settings"
+msgstr "Réglages des empreintes"
+
+msgid "No fingerprint reader found"
+msgstr "Aucun lecteur d’empreintes trouvé"
+
+msgid "Finger Pass needs a reader supported by fprintd."
+msgstr "Finger Pass a besoin d’un lecteur pris en charge par fprintd."
+
+msgid "No finger enrolled yet"
+msgstr "Aucun doigt enregistré pour l’instant"
+
+msgid "%d finger enrolled"
+msgid_plural "%d fingers enrolled"
+msgstr[0] "%d doigt enregistré"
+msgstr[1] "%d doigts enregistrés"
+
+msgid "Use your fingerprint for"
+msgstr "Utiliser votre empreinte pour"
+
+msgid "Turning this on changes /etc/pam.d/sudo and /etc/pam.d/polkit-1, and adds a one-line hint in /etc/finger-pass. You are asked for your password once. Login and the lock screen are left as they are."
+msgstr "L’activation modifie /etc/pam.d/sudo et /etc/pam.d/polkit-1, et ajoute un message d’aide d’une ligne dans /etc/finger-pass. Votre mot de passe vous est demandé une fois. La connexion et l’écran de verrouillage ne sont pas modifiés."
+
+msgid "Administrator dialogs"
+msgstr "Fenêtres d’administration"
+
+msgid "sudo in a terminal"
+msgstr "sudo dans un terminal"
+
+msgid "On"
+msgstr "Activé"
+
+msgid "Off"
+msgstr "Désactivé"
+
+msgid "On, set up outside Finger Pass"
+msgstr "Activé, réglé en dehors de Finger Pass"
+
+msgid "On for every login service, set up outside Finger Pass"
+msgstr "Activé pour tous les services de connexion, réglé en dehors de Finger Pass"
+
+msgid "Turn On"
+msgstr "Activer"
+
+msgid "Turn Off"
+msgstr "Désactiver"
+
+msgid "Fingerprint for both"
+msgstr "L’empreinte pour les deux"
+
+msgid "Back to password only"
+msgstr "Revenir au mot de passe seul"
+
+msgid "Nothing to change"
+msgstr "Rien à modifier"
+
+msgid "Could not change the setup: %s"
+msgstr "Impossible de modifier le réglage : %s"
+
+msgid "Good to know"
+msgstr "Bon à savoir"
+
+msgid "After a restart"
+msgstr "Après un redémarrage"
+
+msgid "Type your password once at login. Your fingerprint works from then on."
+msgstr "Saisissez votre mot de passe une fois à la connexion. Votre empreinte fonctionne ensuite."
+
+msgid "In a terminal"
+msgstr "Dans un terminal"
+
+msgid "sudo waits 5 seconds for the fingerprint. Press Ctrl+C to type your password at once."
+msgstr "sudo attend l’empreinte pendant 5 secondes. Appuyez sur Ctrl+C pour saisir tout de suite votre mot de passe."
+
+msgid "Over SSH"
+msgstr "Par SSH"
+
+msgid "The fingerprint is never asked for; sudo asks for the password."
+msgstr "L’empreinte n’est jamais demandée ; sudo demande le mot de passe."
+
+msgid "On, older setup"
+msgstr "Activé, ancien réglage"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+msgid "Bring the setup up to date"
+msgstr "Mettre le réglage à jour"
+
+msgid "Touch the fingerprint reader, or press Ctrl+C to type your password."
+msgstr "Posez le doigt sur le lecteur, ou appuyez sur Ctrl+C pour saisir votre mot de passe."

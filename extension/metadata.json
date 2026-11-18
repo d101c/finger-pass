@@ -1,0 +1,11 @@
+{
+  "uuid": "finger-pass@griffit.gmail.com",
+  "name": "Finger Pass",
+  "description": "Answer administrator prompts with your fingerprint or your password, whichever comes first. The authentication dialog shows the fingerprint reader and the password field together, with the reader's state and the attempts left.\n\nThe preferences window can turn fingerprint authentication on for sudo and for administrator dialogs: it adds one line to /etc/pam.d/sudo and /etc/pam.d/polkit-1, asks for your password once, and can undo it. Login and the lock screen are not changed; after a restart you still type your password once.",
+  "shell-version": [
+    "51"
+  ],
+  "gettext-domain": "finger-pass",
+  "url": "https://github.com/d101c/finger-pass",
+  "version-name": "0.1"
+}

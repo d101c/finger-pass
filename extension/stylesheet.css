@@ -1,0 +1,50 @@
+.finger-pass-sensor {
+    spacing: 8px;
+    padding-bottom: 6px;
+}
+
+.finger-pass-glyph {
+    color: -st-accent-color;
+}
+
+.finger-pass-glyph.retry {
+    color: #f8e45c;
+}
+
+.finger-pass-glyph.fail {
+    color: #ff7b63;
+}
+
+.finger-pass-glyph.success {
+    color: #57e389;
+}
+
+.finger-pass-glyph.off {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.finger-pass-status {
+    text-align: center;
+}
+
+.finger-pass-dots {
+    spacing: 6px;
+}
+
+.finger-pass-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.finger-pass-dot.used {
+    background-color: #ff7b63;
+}
+
+.finger-pass-or {
+    font-size: 0.85em;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    padding: 4px 0;
+}
