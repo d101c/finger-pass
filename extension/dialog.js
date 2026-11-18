@@ -33,6 +33,9 @@ import {readStatus} from './pam.js';
 const shell_ = Gettext.domain('gnome-shell').gettext;
 const fprintd_ = Gettext.domain('fprintd').gettext;
 
+// Our own value: the shell moved its own around between releases.
+const AVATAR_SIZE = 96;
+
 const TICK_MS = 50;
 // How long a "not recognised" stays on screen before the reader is shown as
 // waiting again.
@@ -79,7 +82,7 @@ export const FingerDialog = GObject.registerClass({
         body.add_child(userBox);
 
         this._userAvatar = new UserWidget.Avatar(this._user, {
-            iconSize: Main.defaultIconSize,
+            iconSize: AVATAR_SIZE,
         });
         this._userAvatar.x_align = Clutter.ActorAlign.CENTER;
         userBox.add_child(this._userAvatar);

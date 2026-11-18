@@ -1,5 +1,5 @@
 // Run with: gjs -m tests/model.test.js
-import {findFprintd, includesCommonAuth, serviceStatus, classify, pamLines, hasHint} from '../extension/model.js';
+import {findFprintd, findInclude, serviceStatus, classify, pamLines, hasHint} from '../extension/model.js';
 
 let failed = 0;
 function check(name, got, want) {
@@ -27,7 +27,15 @@ check('commented line is ignored', findFprintd('# auth sufficient pam_fprintd.so
 check('defaults', findFprintd('auth sufficient pam_fprintd.so\n'), {maxTries: 3, timeout: 30, ours: false});
 check('session line is ignored', findFprintd('session optional pam_fprintd.so\n'), null);
 check('options after # are ignored', findFprintd(commonFprintd), {maxTries: 1, timeout: 10, ours: false});
-check('include detected', includesCommonAuth(stockSudo), true);
+check('Debian include', findInclude(stockSudo), 'common-auth');
+const fedoraSudo = '#%PAM-1.0\nauth       include      system-auth\naccount    include      system-auth\nsession    required     pam_limits.so\n';
+check('Fedora include', findInclude(fedoraSudo), 'system-auth');
+check('substack', findInclude('auth substack password-auth\n'), 'password-auth');
+check('optional include', findInclude('-auth include foo\n'), 'foo');
+check('no include', findInclude('auth required pam_unix.so\n'), null);
+check('account include alone is not ours to precede', findInclude('account include system-auth\n'), null);
+check('Fedora status global (with-fingerprint)', serviceStatus(fedoraSudo, 'auth sufficient pam_fprintd.so\nauth sufficient pam_unix.so\n', 'sudo').state, 'global');
+check('Fedora status none', serviceStatus(fedoraSudo, 'auth sufficient pam_unix.so\n', 'sudo').state, 'none');
 
 check('status none', serviceStatus(stockSudo, commonPlain, 'sudo').state, 'none');
 check('status ours sudo, current', serviceStatus(ourSudo, commonPlain, 'sudo'), {state: 'ours', maxTries: 3, timeout: 5, current: true});

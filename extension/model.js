@@ -65,12 +65,24 @@ export function findFprintd(text) {
     return null;
 }
 
+// The line our own go in front of: the first one that pulls in another
+// file's stack, whatever the distribution calls it (Debian and Ubuntu
+// '@include common-auth', Fedora and Arch 'auth include system-auth',
+// 'auth substack ...').
+export const INCLUDE_RE = '^(@include[[:space:]]+[^[:space:]]+|-?auth[[:space:]]+(include|substack)[[:space:]]+[^[:space:]]+)';
+
 /**
  * @param {string} text - contents of a PAM file
- * @returns {boolean} whether its auth stack pulls in common-auth
+ * @returns {string|null} the name of the file its auth stack pulls in first
+ *   ('common-auth', 'system-auth'...), or null when there is none
  */
-export function includesCommonAuth(text) {
-    return text.split('\n').some(l => /^@include\s+common-auth\b/.test(l.trim()));
+export function findInclude(text) {
+    for (const raw of text.split('\n')) {
+        const m = /^(?:@include\s+|-?auth\s+(?:include|substack)\s+)(\S+)/.exec(raw.trim());
+        if (m)
+            return m[1];
+    }
+    return null;
 }
 
 /**
@@ -89,7 +101,7 @@ export function hasHint(text) {
  * Works out what a service does with the fingerprint reader.
  *
  * @param {string|null} service - contents of the service file, if any
- * @param {string|null} common - contents of common-auth, if any
+ * @param {string|null} common - contents of the file the service includes, if any
  * @param {string} kind - 'sudo' or 'polkit'
  * @returns {{state: string, maxTries: number, timeout: number, current: boolean}}
  *   state is 'ours', 'other' (set up by something else), 'global'
@@ -108,7 +120,7 @@ export function serviceStatus(service, common, kind) {
         return {state: own.ours ? 'ours' : 'other', maxTries: own.maxTries, timeout: own.timeout, current};
     }
 
-    const inherited = common !== null && includesCommonAuth(service)
+    const inherited = common !== null && findInclude(service) !== null
         ? findFprintd(common) : null;
     if (inherited)
         return {state: 'global', maxTries: inherited.maxTries, timeout: inherited.timeout, current: false};
