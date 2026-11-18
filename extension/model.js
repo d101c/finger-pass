@@ -15,6 +15,9 @@ const DEFAULT_TIMEOUT = 30;
 export const TIMEOUT = {sudo: 5, polkit: 10};
 export const MAX_TRIES = 3;
 export const HINT_FILE = '/etc/finger-pass/sudo-hint';
+// Left by Turn On, removed by Turn Off: tells a setup that was reset (by a
+// package update, say) from one that was never made.
+export const ENABLED_FILE = '/etc/finger-pass/enabled';
 
 /**
  * The lines Turn On puts before @include common-auth in a service file.
@@ -83,6 +86,26 @@ export function findInclude(text) {
             return m[1];
     }
     return null;
+}
+
+/**
+ * Whether our copy of the vendor polkit file has fallen behind it.
+ *
+ * @param {string|null} etc - /etc/pam.d/polkit-1, if any
+ * @param {string|null} vendor - /usr/lib/pam.d/polkit-1, if any
+ * @returns {boolean} false when the copy is not ours or is up to date
+ */
+export function copyIsStale(etc, vendor) {
+    if (etc === null || vendor === null)
+        return false;
+
+    const lines = etc.split('\n');
+    if (!new RegExp(`^# copied from .* by ${MARK}$`).test(lines[0] ?? ''))
+        return false;
+
+    const ours = new RegExp(`#\\s*${MARK}\\s*$`);
+    const norm = list => list.map(l => l.trimEnd()).join('\n').trimEnd();
+    return norm(lines.slice(1).filter(l => !ours.test(l))) !== norm(vendor.split('\n'));
 }
 
 /**

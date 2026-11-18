@@ -22,7 +22,7 @@ import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 import * as ShellEntry from 'resource:///org/gnome/shell/ui/shellEntry.js';
 import * as UserWidget from 'resource:///org/gnome/shell/ui/userWidget.js';
 import {wiggle} from 'resource:///org/gnome/shell/misc/animationUtils.js';
-import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {hasEnrolledFinger} from './fprintd.js';
 import {FingerGlyph} from './glyph.js';
@@ -53,8 +53,10 @@ const MAX_RESTARTS = 3;
 export const FingerDialog = GObject.registerClass({
     Signals: {'done': {param_types: [GObject.TYPE_BOOLEAN]}},
 }, class FingerDialog extends ModalDialog.ModalDialog {
-    _init(actionId, description, cookie, userNames) {
+    _init(actionId, description, cookie, userNames, settings) {
         super._init({styleClass: 'prompt-dialog'});
+
+        this._settings = settings;
 
         this.actionId = actionId;
 
@@ -178,6 +180,30 @@ export const FingerDialog = GObject.registerClass({
         passwordBox.add_child(warningBox);
         body.add_child(passwordBox);
 
+        // A reminder where the fingerprint would normally be: shown only when
+        // a finger is enrolled and the setup is missing or needs repair.
+        this._nudgeBox = new St.BoxLayout({
+            style_class: 'finger-pass-nudge',
+            x_align: Clutter.ActorAlign.CENTER,
+            visible: false,
+        });
+        this._nudgeLabel = new St.Label({
+            style_class: 'finger-pass-nudge-label',
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this._nudgeButton = new St.Button({
+            style_class: 'finger-pass-link',
+            can_focus: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this._nudgeButton.connect('clicked', () => {
+            Extension.lookupByUUID('finger-pass@griffit.gmail.com')?.openPreferences();
+            this._nudgeBox.hide();
+        });
+        this._nudgeBox.add_child(this._nudgeLabel);
+        this._nudgeBox.add_child(this._nudgeButton);
+        body.add_child(this._nudgeBox);
+
         this._cancelButton = this.addButton({
             label: shell_('Cancel'),
             action: this.cancel.bind(this),
@@ -235,11 +261,13 @@ export const FingerDialog = GObject.registerClass({
     }
 
     async _loadSetup() {
-        const [{polkit}, enrolled] = await Promise.all([readStatus(), hasEnrolledFinger()]);
+        const [{polkit, installed, stale}, enrolled] =
+            await Promise.all([readStatus(), hasEnrolledFinger()]);
         if (this._closed)
             return;
 
         this._enrolled = enrolled;
+        this._maybeNudge(polkit, installed, stale, enrolled);
 
         this._fingerprint = polkit.state !== 'none';
         this._maxTries = polkit.maxTries;
@@ -250,6 +278,21 @@ export const FingerDialog = GObject.registerClass({
 
         this._started = true;
         this._onUserChanged();
+    }
+
+    _maybeNudge(polkit, installed, stale, enrolled) {
+        const missing = polkit.state === 'none';
+        const outOfDate = polkit.state === 'ours' && stale;
+
+        if (!enrolled || !(missing || outOfDate) || !this._settings?.get_boolean('show-nudge'))
+            return;
+
+        const repair = installed || outOfDate;
+        this._nudgeLabel.text = repair
+            ? _('The fingerprint setup needs repair.')
+            : _('Your fingerprint is not used here yet.');
+        this._nudgeButton.label = repair ? _('Repair') : _('Set up');
+        this._nudgeBox.show();
     }
 
     _onUserChanged() {

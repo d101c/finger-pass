@@ -13,6 +13,7 @@ gnome-extensions pack "$SRC" \
   --extra-source=model.js \
   --extra-source=pam.js \
   --extra-source=LICENSE \
+  --schema=schemas/org.gnome.shell.extensions.finger-pass.gschema.xml \
   --podir=po \
   --gettext-domain=finger-pass \
   --out-dir="$REPO" \

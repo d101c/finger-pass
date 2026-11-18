@@ -71,6 +71,24 @@ afterwards: it is a known limit of `sudo-rs`.)
 - Right after a cancelled request the reader can be busy for a few seconds;
   the dialog starts with the password and brings the reader back by itself.
 
+## If the fingerprint stops working
+
+A package update can overwrite `/etc/pam.d/sudo` or leave an old copy of the
+polkit file behind. Finger Pass notices: in an administrator dialog, when a
+finger is enrolled but the fingerprint is not set up, a short line appears
+under the password field.
+
+![Reminder in the dialog](guide/09-reminder.png)
+
+Click **Set up** (or **Repair**, when the setup used to be there) to open the
+preferences. The window says what happened and the button becomes **Repair**.
+One click and your password once puts everything back.
+
+![Preferences, setup reset](guide/10-repair.png)
+
+The reminder can be turned off with the **Remind me in administrator
+dialogs** switch in the same window.
+
 ## Going back
 
 Click **Turn Off** in the preferences: the line is removed from both files.

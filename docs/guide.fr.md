@@ -74,6 +74,24 @@ ne les utilise qu'après : c'est une limite connue de `sudo-rs`.)
   secondes ; la fenêtre démarre avec le mot de passe et retrouve le lecteur
   toute seule.
 
+## Si l'empreinte ne marche plus
+
+Une mise à jour de paquet peut écraser `/etc/pam.d/sudo` ou laisser une
+ancienne copie du fichier polkit. Finger Pass le remarque : dans une fenêtre
+d'administration, quand un doigt est enregistré mais que l'empreinte n'est
+pas configurée, une courte ligne apparaît sous le champ du mot de passe.
+
+![Rappel dans la fenêtre](guide/09-reminder.png)
+
+Cliquez sur **Set up** (ou **Repair**, quand le réglage existait avant) pour
+ouvrir les préférences. La fenêtre dit ce qui s'est passé et le bouton devient
+**Repair**. Un clic et votre mot de passe une fois remettent tout en place.
+
+![Préférences, réglage réinitialisé](guide/10-repair.png)
+
+Le rappel se coupe avec l'interrupteur **Remind me in administrator dialogs**
+de la même fenêtre.
+
 ## Revenir en arrière
 
 Cliquez sur **Désactiver** dans les préférences : la ligne est retirée des

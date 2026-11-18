@@ -15,9 +15,10 @@ const MAX_ATTEMPTS = 10;
 // Same job as the shell's own agent, with our dialog.
 const FingerAgent = GObject.registerClass(
 class FingerAgent extends Shell.PolkitAuthenticationAgent {
-    _init() {
+    _init(settings) {
         super._init();
 
+        this._settings = settings;
         this._dialog = null;
 
         this.connect('initiate', this._onInitiate.bind(this));
@@ -25,7 +26,7 @@ class FingerAgent extends Shell.PolkitAuthenticationAgent {
     }
 
     _onInitiate(_agent, actionId, message, _iconName, cookie, userNames) {
-        this._dialog = new FingerDialog(actionId, message, cookie, userNames);
+        this._dialog = new FingerDialog(actionId, message, cookie, userNames, this._settings);
         this._dialog.connect('done', (_dialog, dismissed) => this._finish(dismissed));
     }
 
@@ -50,6 +51,7 @@ class FingerAgent extends Shell.PolkitAuthenticationAgent {
 
 export default class FingerPassExtension extends Extension {
     enable() {
+        this._settings = this.getSettings();
         this._attempts = 0;
         this._takeOver();
     }
@@ -67,7 +69,7 @@ export default class FingerPassExtension extends Extension {
         if (stock) {
             stock.disable();
 
-            const agent = new FingerAgent();
+            const agent = new FingerAgent(this._settings);
             try {
                 agent.register();
                 this._stock = stock;
@@ -99,6 +101,7 @@ export default class FingerPassExtension extends Extension {
         // the screen, which disables the extension.
         this._agent?.shutdown();
         this._agent = null;
+        this._settings = null;
 
         // Hand the job back, unless the session mode has no agent at all.
         if (this._stock && Main.sessionMode.components.includes('polkitAgent'))

@@ -7,5 +7,6 @@
   ],
   "gettext-domain": "finger-pass",
   "url": "https://github.com/d101c/finger-pass",
-  "version-name": "0.1"
+  "version-name": "0.1",
+  "settings-schema": "org.gnome.shell.extensions.finger-pass"
 }

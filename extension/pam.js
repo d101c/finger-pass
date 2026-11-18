@@ -7,7 +7,7 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-import {HINT_FILE, INCLUDE_RE, MARK, findInclude, pamLines, serviceStatus} from './model.js';
+import {ENABLED_FILE, HINT_FILE, INCLUDE_RE, MARK, copyIsStale, findInclude, pamLines, serviceStatus} from './model.js';
 
 Gio._promisify(Gio.File.prototype, 'load_contents_async');
 Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
@@ -106,7 +106,9 @@ put() {
     tmp=
 }
 
-if [ "$wantpolkit" = yes ] && [ ! -e ${POLKIT} ]; then
+# A copy of ours is made again from the vendor file, so that a vendor change
+# is picked up; a polkit file of someone else is not ours to replace.
+if [ "$wantpolkit" = yes ] && { [ ! -e ${POLKIT} ] || head -n 1 ${POLKIT} | grep -q '^# copied from .* by ${MARK}$'; }; then
     tmp=$(mktemp ${POLKIT}.XXXXXX)
     { echo '# copied from ${POLKIT_VENDOR} by ${MARK}'; cat ${POLKIT_VENDOR}; } > "$tmp"
     chown root:root "$tmp"
@@ -115,8 +117,13 @@ if [ "$wantpolkit" = yes ] && [ ! -e ${POLKIT} ]; then
     tmp=
 fi
 
-if [ "$wantsudo" = yes ]; then
+if [ "$wantsudo" = yes ] || [ "$wantpolkit" = yes ]; then
     install -d -m 755 /etc/${MARK}
+    : > ${ENABLED_FILE}
+    chmod 644 ${ENABLED_FILE}
+fi
+
+if [ "$wantsudo" = yes ]; then
     tmp=$(mktemp /etc/${MARK}/.hint.XXXXXX)
     printf '%s\\n' ${quote(text)} > "$tmp"
     chmod 644 "$tmp"
@@ -150,7 +157,7 @@ if [ -e ${POLKIT} ] && head -n 1 ${POLKIT} | grep -q '^# copied from .* by ${MAR
     rm -f ${POLKIT}
 fi
 
-rm -f ${HINT_FILE}
+rm -f ${HINT_FILE} ${ENABLED_FILE}
 rmdir /etc/${MARK} 2>/dev/null || true
 `;
 
@@ -168,8 +175,8 @@ async function read(path) {
  *   with the fingerprint reader, see serviceStatus() in model.js
  */
 export async function readStatus() {
-    const [sudo, polkitEtc, polkitVendor] = await Promise.all(
-        [SUDO, POLKIT, POLKIT_VENDOR].map(read));
+    const [sudo, polkitEtc, polkitVendor, enabled, hint] = await Promise.all(
+        [SUDO, POLKIT, POLKIT_VENDOR, ENABLED_FILE, HINT_FILE].map(read));
     const polkit = polkitEtc ?? polkitVendor;
 
     // What each service pulls in (common-auth, system-auth...), for the case
@@ -184,6 +191,10 @@ export async function readStatus() {
     return {
         sudo: serviceStatus(sudo, await included(sudo), 'sudo'),
         polkit: serviceStatus(polkit, await included(polkit), 'polkit'),
+        // Turn On has been used here (the hint file is what older versions left).
+        installed: enabled !== null || hint !== null,
+        // Our copy of the polkit file no longer matches the vendor file.
+        stale: copyIsStale(polkitEtc, polkitVendor),
     };
 }
 

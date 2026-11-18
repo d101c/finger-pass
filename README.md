@@ -14,6 +14,11 @@ password, whichever comes first, in one dialog.
   `pkexec /bin/sh -c <fixed script>` (nothing run as root is a user-writable
   file).
 - `extension/fprintd.js` — readers and enrolled fingers, over D-Bus.
+- A reminder in the dialog (and a **Repair** button in the preferences)
+  when a finger is enrolled but the setup is missing, was reset by a package
+  update (`/etc/finger-pass/enabled` says it was made), or the copy of the
+  polkit file has fallen behind the vendor file. A GSettings switch turns the
+  reminder off.
 - `extension/model.js` — plain logic, covered by `tests/model.test.js`
   (`gjs -m tests/model.test.js`).
 
@@ -69,9 +74,10 @@ Known rough edges:
   a few seconds.
 - In a terminal, sudo waits 5 seconds for the finger; Ctrl+C goes to the password. Keys typed during the wait are shown (sudo-rs #1694).
 - The hint is printed even when no finger is enrolled.
+- Repair is manual (one click and a password); nothing runs by itself as root, which would need a file installed outside the extension.
 - On Debian and Ubuntu, `/etc/pam.d/sudo` is a package-managed file. An update that does not touch it keeps our lines. One that does can ask a question (keep or replace); run without a terminal and without `--force-confold`, `apt` or `dpkg` fails on that question. On Fedora (`%config(noreplace)`) and Arch (`.pacnew`) the modified file is kept.
-- The polkit copy in `/etc/pam.d` hides the vendor file: later changes to the vendor file are not picked up until Turn Off and Turn On.
-- Removing the extension does not remove the setup. Turn Off first, or delete the lines ending in `# finger-pass` from `/etc/pam.d/sudo`, `/etc/pam.d/sudo-i`, `/etc/pam.d/polkit-1` and the folder `/etc/finger-pass`.
+- The polkit copy in `/etc/pam.d` hides the vendor file: the extension notices when it falls behind and offers Repair, which makes a fresh copy.
+- Removing the extension does not remove the setup. Turn Off first, or delete the lines ending in `# finger-pass` from `/etc/pam.d/sudo`, `/etc/pam.d/sudo-i`, `/etc/pam.d/polkit-1` (and the file itself when its first line says it was copied by finger-pass) and the folder `/etc/finger-pass`.
 - Locking the screen dismisses a request that is still open (the extension
   is disabled on the lock screen).
 - shexli 0.2.1 reports EGO-M-004 on shell-version 51: its version table is

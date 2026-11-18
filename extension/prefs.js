@@ -9,16 +9,18 @@ import {ExtensionPreferences, gettext as _, ngettext} from 'resource:///org/gnom
 import {listReaders} from './fprintd.js';
 import * as Pam from './pam.js';
 
-function stateLabel({state, current}) {
+function stateLabel({state, current}, {installed, stale}) {
     switch (state) {
     case 'ours':
+        if (stale)
+            return _('On, but the copy of the polkit file is out of date');
         return current ? _('On') : _('On, older setup');
     case 'other':
         return _('On, set up outside Finger Pass');
     case 'global':
         return _('On for every login service, set up outside Finger Pass');
     default:
-        return _('Off');
+        return installed ? _('Reset, probably by an update') : _('Off');
     }
 }
 
@@ -65,6 +67,17 @@ export default class FingerPassPreferences extends ExtensionPreferences {
         actionRow.activatable_widget = actionButton;
         pamGroup.add(actionRow);
 
+        // Reminders
+        const settings = this.getSettings();
+        const remindGroup = new Adw.PreferencesGroup();
+        page.add(remindGroup);
+        const remindRow = new Adw.SwitchRow({
+            title: _('Remind me in administrator dialogs'),
+            subtitle: _('When a fingerprint is enrolled but not used there, or the setup needs repair.'),
+        });
+        settings.bind('show-nudge', remindRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        remindGroup.add(remindRow);
+
         // Notes
         const notesGroup = new Adw.PreferencesGroup({title: _('Good to know')});
         page.add(notesGroup);
@@ -101,9 +114,9 @@ export default class FingerPassPreferences extends ExtensionPreferences {
         };
 
         const refreshPam = async () => {
-            const {sudo, polkit} = await Pam.readStatus();
-            polkitRow.subtitle = stateLabel(polkit);
-            sudoRow.subtitle = stateLabel(sudo);
+            const {sudo, polkit, installed, stale} = await Pam.readStatus();
+            polkitRow.subtitle = stateLabel(polkit, {installed, stale});
+            sudoRow.subtitle = stateLabel(sudo, {installed, stale: false});
 
             const ours = sudo.state === 'ours' || polkit.state === 'ours';
             const foreign = !ours && (sudo.state !== 'none' || polkit.state !== 'none');
@@ -112,13 +125,18 @@ export default class FingerPassPreferences extends ExtensionPreferences {
             const outdated = (sudo.state === 'ours' && !sudo.current) ||
                 (polkit.state === 'ours' && !polkit.current);
 
-            turnOn = !ours || !complete || outdated;
-            actionButton.label = !turnOn ? _('Turn Off') : outdated ? _('Update') : _('Turn On');
+            // Set up once, and something has since taken it away or let it fall behind.
+            const broken = installed && (sudo.state === 'none' || polkit.state === 'none' || stale);
+
+            turnOn = !ours || !complete || outdated || stale;
+            actionButton.label = !turnOn ? _('Turn Off')
+                : broken ? _('Repair') : outdated ? _('Update') : _('Turn On');
             actionButton.css_classes = turnOn ? ['suggested-action'] : [];
             actionButton.sensitive = !(foreign && complete);
             actionRow.title = foreign && complete
                 ? _('Nothing to change')
-                : outdated ? _('Bring the setup up to date')
+                : broken ? _('Bring the fingerprint back')
+                    : outdated ? _('Bring the setup up to date')
                     : turnOn ? _('Fingerprint for both') : _('Back to password only');
         };
 

@@ -1,5 +1,5 @@
 // Run with: gjs -m tests/model.test.js
-import {findFprintd, findInclude, serviceStatus, classify, pamLines, hasHint} from '../extension/model.js';
+import {findFprintd, findInclude, serviceStatus, classify, pamLines, hasHint, copyIsStale} from '../extension/model.js';
 
 let failed = 0;
 function check(name, got, want) {
@@ -55,6 +55,14 @@ check('no match (translated)', classify('Empreinte non reconnue', true, fr), 'no
 check('timed out', classify('Verification timed out', false), 'timed-out');
 check('retry', classify('Finger scan was too fast, try again', true), 'retry');
 check('prompt', classify('Place your right index finger on the fingerprint reader', false), 'prompt');
+
+const vendor = '#%PAM-1.0\n\nauth include system-auth\naccount include system-auth\n';
+const copy = (v, extra = '') => `# copied from /usr/lib/pam.d/polkit-1 by finger-pass\n${v.replace('auth include', `auth    sufficient      pam_fprintd.so max-tries=3 timeout=10 # finger-pass\nauth include`)}${extra}`;
+check('copy up to date', copyIsStale(copy(vendor), vendor), false);
+check('copy behind a vendor change', copyIsStale(copy(vendor), vendor + 'session optional pam_systemd.so\n'), true);
+check('not our copy', copyIsStale(vendor, vendor + 'x\n'), false);
+check('no vendor file', copyIsStale(copy(vendor), null), false);
+check('trailing blanks do not count', copyIsStale(copy(vendor), vendor.replace('\n', ' \n')), false);
 
 print(failed ? `${failed} failed` : 'all passed');
 imports.system.exit(failed ? 1 : 0);

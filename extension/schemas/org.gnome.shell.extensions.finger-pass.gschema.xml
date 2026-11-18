@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.finger-pass" path="/org/gnome/shell/extensions/finger-pass/">
+    <key name="show-nudge" type="b">
+      <default>true</default>
+      <summary>Remind me in administrator dialogs</summary>
+      <description>Show a short reminder in the authentication dialog when a fingerprint is enrolled but not used there, or when the setup needs repair.</description>
+    </key>
+  </schema>
+</schemalist>
