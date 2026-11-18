@@ -51,6 +51,17 @@ first line says it was copied by finger-pass), then the folder
 
 Ubuntu 26.10 (GNOME Shell 51.0, `sudo-rs`) and Fedora 45 (GNOME Shell 51.1, classic `sudo`, SELinux enforcing, `authselect`) in virtual machines with a virtual reader; and on a real Synaptics 06cb:00bd reader (Ubuntu 26.10). Other readers, other distributions and other shell versions are not tested: reports are welcome.
 
+## Roadmap and issues
+
+Bugs, ideas, planned work and things still to test are tracked in the
+[GitHub issues](https://github.com/d101c/finger-pass/issues); what is planned for
+the next version is grouped in a milestone.
+
+- **Report a bug:** open an issue with your distribution, GNOME Shell version,
+  what you did, what you expected and what happened, plus any error shown by
+  `journalctl -b /usr/bin/gnome-shell`.
+- **Suggest an idea:** open an issue that describes what you want to do.
+
 ## License
 
 GPL-2.0-or-later.
@@ -116,10 +127,8 @@ On a real reader (Synaptics 06cb:00bd, press type, Ubuntu 26.10): an
 administrator dialog answered by finger, and sudo with one refused finger
 then an accepted one.
 
-Not done yet: a real reader on Fedora, readers from other vendors, other
-shell versions, openSUSE (its polkit asks for the root password by default,
-which the fingerprint does not change; not tested), lock screen and terminal
-visuals, EGO submission.
+Not done yet (more readers, distributions and shell versions): see the
+[issues](https://github.com/d101c/finger-pass/issues).
 
 Known rough edges:
 - The password prompt of Turn On / Turn Off shows the raw `/bin/sh -c …`
