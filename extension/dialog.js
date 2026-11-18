@@ -22,7 +22,7 @@ import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 import * as ShellEntry from 'resource:///org/gnome/shell/ui/shellEntry.js';
 import * as UserWidget from 'resource:///org/gnome/shell/ui/userWidget.js';
 import {wiggle} from 'resource:///org/gnome/shell/misc/animationUtils.js';
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {hasEnrolledFinger} from './fprintd.js';
 import {FingerGlyph} from './glyph.js';
@@ -53,10 +53,11 @@ const MAX_RESTARTS = 3;
 export const FingerDialog = GObject.registerClass({
     Signals: {'done': {param_types: [GObject.TYPE_BOOLEAN]}},
 }, class FingerDialog extends ModalDialog.ModalDialog {
-    _init(actionId, description, cookie, userNames, settings) {
+    _init(actionId, description, cookie, userNames, settings, openPreferences) {
         super._init({styleClass: 'prompt-dialog'});
 
         this._settings = settings;
+        this._openPreferences = openPreferences;
 
         this.actionId = actionId;
 
@@ -197,7 +198,7 @@ export const FingerDialog = GObject.registerClass({
             y_align: Clutter.ActorAlign.CENTER,
         });
         this._nudgeButton.connect('clicked', () => {
-            Extension.lookupByUUID('finger-pass@griffit.gmail.com')?.openPreferences();
+            this._openPreferences?.();
             this._nudgeBox.hide();
         });
         this._nudgeBox.add_child(this._nudgeLabel);

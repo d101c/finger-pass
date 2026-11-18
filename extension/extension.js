@@ -15,10 +15,11 @@ const MAX_ATTEMPTS = 10;
 // Same job as the shell's own agent, with our dialog.
 const FingerAgent = GObject.registerClass(
 class FingerAgent extends Shell.PolkitAuthenticationAgent {
-    _init(settings) {
+    _init(settings, openPreferences) {
         super._init();
 
         this._settings = settings;
+        this._openPreferences = openPreferences;
         this._dialog = null;
 
         this.connect('initiate', this._onInitiate.bind(this));
@@ -26,7 +27,8 @@ class FingerAgent extends Shell.PolkitAuthenticationAgent {
     }
 
     _onInitiate(_agent, actionId, message, _iconName, cookie, userNames) {
-        this._dialog = new FingerDialog(actionId, message, cookie, userNames, this._settings);
+        this._dialog = new FingerDialog(actionId, message, cookie, userNames, this._settings,
+            this._openPreferences);
         this._dialog.connect('done', (_dialog, dismissed) => this._finish(dismissed));
     }
 
@@ -69,7 +71,7 @@ export default class FingerPassExtension extends Extension {
         if (stock) {
             stock.disable();
 
-            const agent = new FingerAgent(this._settings);
+            const agent = new FingerAgent(this._settings, () => this.openPreferences());
             try {
                 agent.register();
                 this._stock = stock;
